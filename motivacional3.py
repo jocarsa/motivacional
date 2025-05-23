@@ -21,7 +21,7 @@ def split_sentence(sentence):
     return parts
 
 # Create a video with motivational sentences
-def create_motivational_video(sentences, output_file_prefix, total_duration=36000, fps=10):
+def create_motivational_video(sentences, output_file_prefix, total_duration=36000000, fps=10):
     # Define video parameters
     width, height = 1920, 1080
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
@@ -36,7 +36,7 @@ def create_motivational_video(sentences, output_file_prefix, total_duration=3600
     random.shuffle(sentences)
 
     # Calculate total frames needed
-    total_frames = total_duration * fps
+    total_frames = total_duration * fps // 1000  # Convert milliseconds to seconds
     frames_written = 0
 
     for sentence in sentences:
@@ -104,13 +104,6 @@ def create_motivational_video(sentences, output_file_prefix, total_duration=3600
                 cv2.imshow('Frame Buffer', frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
-
-        # Hold the final frame for 10 seconds
-        hold_frames = 10 * fps
-        while frames_written < total_frames and hold_frames > 0:
-            video_writer.write(frame)
-            frames_written += 1
-            hold_frames -= 1
 
     # Release the video writer
     video_writer.release()
