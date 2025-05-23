@@ -46,9 +46,6 @@ def create_motivational_video(sentences, output_file_prefix, total_duration=3600
 
     video_writer = cv2.VideoWriter(output_file, fourcc, fps, (width, height))
 
-    # Shuffle the sentences
-    random.shuffle(sentences)
-
     # Load fonts
     fonts = load_fonts_from_folder('fuentes')
     if not fonts:
@@ -58,66 +55,70 @@ def create_motivational_video(sentences, output_file_prefix, total_duration=3600
     total_frames = total_duration * fps // 1000  # Convert milliseconds to seconds
     frames_written = 0
 
-    for sentence in sentences:
-        if frames_written >= total_frames:
-            break
+    while frames_written < total_frames:
+        # Shuffle the sentences
+        random.shuffle(sentences)
 
-        # Split the sentence into parts
-        parts = split_sentence(sentence)
-
-        # Choose a random font for the slide
-        font = random.choice(fonts)
-
-        # Choose a random color for the text
-        color = (
-            random.randint(127, 255),
-            random.randint(127, 255),
-            random.randint(127, 255)
-        )
-
-        # Calculate the vertical position for each line
-        line_height = 60  # Adjust this value based on your font size and desired spacing
-        start_y = (height - len(parts) * line_height) // 2
-
-        # Write-on effect
-        for i, part in enumerate(parts):
+        for sentence in sentences:
             if frames_written >= total_frames:
                 break
 
-            for j in range(len(part) + 1):
+            # Split the sentence into parts
+            parts = split_sentence(sentence)
+
+            # Choose a random font for the slide
+            font = random.choice(fonts)
+
+            # Choose a random color for the text
+            color = (
+                random.randint(127, 255),
+                random.randint(127, 255),
+                random.randint(127, 255)
+            )
+
+            # Calculate the vertical position for each line
+            line_height = 60  # Adjust this value based on your font size and desired spacing
+            start_y = (height - len(parts) * line_height) // 2
+
+            # Write-on effect
+            for i, part in enumerate(parts):
                 if frames_written >= total_frames:
                     break
 
-                # Create a new frame for each letter
-                frame = np.zeros((height, width, 3), dtype=np.uint8)
-                pil_image = Image.fromarray(frame)
-                draw = ImageDraw.Draw(pil_image)
+                for j in range(len(part) + 1):
+                    if frames_written >= total_frames:
+                        break
 
-                # Display all parts up to the current part
-                for k in range(i + 1):
-                    current_text = part[:j] if k == i else parts[k]
+                    # Create a new frame for each letter
+                    frame = np.zeros((height, width, 3), dtype=np.uint8)
+                    pil_image = Image.fromarray(frame)
+                    draw = ImageDraw.Draw(pil_image)
 
-                    # Calculate text size to center it horizontally
-                    text_bbox = draw.textbbox((0, 0), current_text, font=font)
-                    text_width = text_bbox[2] - text_bbox[0]
-                    text_height = text_bbox[3] - text_bbox[1]
-                    text_x = (width - text_width) // 2
-                    text_y = start_y + k * line_height
+                    # Display all parts up to the current part
+                    for k in range(i + 1):
+                        current_text = part[:j] if k == i else parts[k]
 
-                    # Draw the text on the PIL image
-                    draw.text((text_x, text_y), current_text, font=font, fill=color)
+                        # Calculate text size to center it horizontally
+                        text_bbox = draw.textbbox((0, 0), current_text, font=font)
+                        text_width = text_bbox[2] - text_bbox[0]
+                        text_height = text_bbox[3] - text_bbox[1]
+                        text_x = (width - text_width) // 2
+                        text_y = start_y + k * line_height
 
-                # Convert the PIL image back to an OpenCV image
-                frame = np.array(pil_image)
+                        # Draw the text on the PIL image
+                        draw.text((text_x, text_y), current_text, font=font, fill=color)
 
-                # Write the frame to the video
-                video_writer.write(frame)
-                frames_written += 1
+                    # Convert the PIL image back to an OpenCV image
+                    frame = np.array(pil_image)
 
-                # Display the frame buffer
-                cv2.imshow('Frame Buffer', frame)
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
+                    # Write the frame to the video
+                    video_writer.write(frame)
+                    frames_written += 1
+
+                    # Display the frame buffer
+                    cv2.imshow('Frame Buffer', frame)
+                    if cv2.waitKey(1) & 0xFF == ord('q'):
+                        break
 
     # Release the video writer
     video_writer.release()
@@ -129,5 +130,5 @@ if __name__ == "__main__":
     output_file_prefix = 'motivational_video' # Prefix for the output video file
 
     sentences = read_sentences_from_file(file_path)
-    for _ in range(0, 1):
-        create_motivational_video(sentences, output_file_prefix)
+    create_motivational_video(sentences, output_file_prefix)
+
